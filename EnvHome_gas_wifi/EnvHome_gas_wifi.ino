@@ -147,6 +147,8 @@ int latestMq2Value = 0;
 
 bool alarmLatched = false;   
 
+int alarmState = 0; // logica per Alexa
+
 // ---------- Mario main theme melody
 int melody[] = {
   NOTE_E7, NOTE_E7, 0, NOTE_E7,
@@ -313,9 +315,24 @@ void loop() {
 
     bool danger = gasDangerDetected();
 
+    if (danger) {
+        alarmState = 1;
+      } else {
+        alarmState = 0;
+      }
+
     if (danger && !alarmLatched) {
       Serial.println("⚠ Gas danger detected -> start melody");
       alarmLatched = true;
+
+      triggerAlexaGasAlert();
+
+      while (client.connected()) {
+        String line = client.readStringUntil('\n');
+        Serial.println(line);
+      }
+
+
       sing(1);   // Mario theme
       sing(1);
       sing(2);
@@ -331,7 +348,7 @@ void loop() {
   if (millis() - lastUpdate >= interval) {
     lastUpdate = millis();
 
-    float temperature = ENV.readTemperature();
+    float temperature = ENV.readTemperature() - 4.0F;
     float humidity    = ENV.readHumidity();
     float pressure    = ENV.readPressure();
     float illuminance = ENV.readIlluminance();
@@ -353,7 +370,8 @@ void loop() {
       dataFile.print(uva); dataFile.print(",");
       dataFile.print(uvb); dataFile.print(",");
       dataFile.print(uvIndex); dataFile.print(",");
-      dataFile.println(mq2Value);
+      dataFile.println(mq2Value); dataFile.print(",");
+      dataFile.println(alarmState); dataFile.print(";");
       dataFile.close();
     }
 
@@ -363,6 +381,7 @@ void loop() {
     ThingSpeak.setField(3, pressure);
     ThingSpeak.setField(4, illuminance);
     ThingSpeak.setField(5, mq2Value);
+    ThingSpeak.setField(6, alarmState);
 
     // ThingSpeak.writeFields(channelID, writeAPIKey);
     // Serial.println("Data logged & sent.");
@@ -516,4 +535,31 @@ bool gasDangerDetected() {
     gasSamples[2] > threshold &&
     gasSamples[3] > threshold
   );
+}
+
+
+void triggerAlexaGasAlert() {
+
+  WiFiSSLClient client;
+
+  Serial.println("Calling VoiceMonkey...");
+
+  if (client.connect("api-v2.voicemonkey.io", 443)) {
+
+    client.println("GET /trigger?token=44f3cb0882b0757e939c267387447251_56a99695294642dc6791d53e216c53fc&device=gasalert HTTP/1.1");
+    client.println("Host: api-v2.voicemonkey.io");
+    client.println("Connection: close");
+    client.println();
+
+    while (client.connected()) {
+      String line = client.readStringUntil('\n');
+      Serial.println(line);
+    }
+
+  } else {
+
+    Serial.println("VoiceMonkey connection failed");
+
+  }
+
 }
