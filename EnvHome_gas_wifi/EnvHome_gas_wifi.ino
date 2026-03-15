@@ -8,6 +8,10 @@
   - Mq2 sensor
   - Buzzer attivo 
   - Transistor
+
+
+  ----
+  - integrazione con Alexa
 */
 
 #include <Arduino_MKRENV.h>
