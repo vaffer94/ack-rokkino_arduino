@@ -135,11 +135,6 @@ const char* writeAPIKey = "IXA4QPX961FI8RMO";
 unsigned long lastUpdate = 0;
 const unsigned long interval = 20000; // 20 seconds
 
-// // --------- Buzzer variables ------
-// bool buzzerState = false;
-// bool lastButtonState = HIGH;
-
-
 // ----------- allarm logic --------
 
 const unsigned long gasSampleInterval = 10000;   // 10 secondi
@@ -151,7 +146,6 @@ int gasSampleCount = 0;
 int latestMq2Value = 0;
 
 bool alarmLatched = false;   
-
 
 // ---------- Mario main theme melody
 int melody[] = {
@@ -254,15 +248,7 @@ int underworld_tempo[] = {
 
 
 void setup() {
-  // Serial.begin(9600);
-  // while (!Serial);
 
-  // if (!ENV.begin()) {
-  //   Serial.println("Failed to initialize MKR ENV Shield!");
-  //   while (1);
-  // }
-
-  // pinMode(MQ2_PIN, INPUT);
   Serial.begin(9600);
   delay(2000);
   // while (!Serial);
@@ -298,19 +284,8 @@ void setup() {
     dataFile.close();
   }
 
-  // pinMode(BUZZER_PIN, OUTPUT);
-
   pinMode(5, OUTPUT);
   pinMode(13, OUTPUT);
-
-  // pinMode(BUZZER_PIN, OUTPUT);
-  // digitalWrite(BUZZER_PIN, LOW);
-
-  // pinMode(BUTTON_PIN, INPUT_PULLUP);
-
-  // pinMode(BUZZER_PIN, OUTPUT);
-  // digitalWrite(BUZZER_PIN, HIGH);  // accende il buzzer
-  // // // pinMode(BUZZER_PIN, OUTPUT);
 }
 
 
@@ -342,6 +317,8 @@ void loop() {
       Serial.println("⚠ Gas danger detected -> start melody");
       alarmLatched = true;
       sing(1);   // Mario theme
+      sing(1);
+      sing(2);
     }
 
     // resetta il latch quando il pericolo non c'è più
@@ -350,30 +327,6 @@ void loop() {
     }
   }
 
-  // // // digitalWrite(BUZZER_PIN, HIGH);
-  // // // delay(1000);
-
-  // // // digitalWrite(BUZZER_PIN, LOW);
-  // // // delay(1000);
-  // bool buttonState = digitalRead(BUTTON_PIN);
-
-  // if (buttonState == LOW && lastButtonState == HIGH) {
-  //   // pulsante premuto
-
-  //   buzzerState = !buzzerState;   // toggle
-
-  //   if (buzzerState) {
-  //     digitalWrite(BUZZER_PIN, HIGH);
-  //     Serial.println("Buzzer ON");
-  //   } else {
-  //     digitalWrite(BUZZER_PIN, LOW);
-  //     Serial.println("Buzzer OFF");
-  //   }
-
-  //   delay(200); // piccolo debounce
-  // }
-
-  // lastButtonState = buttonState;
 
   if (millis() - lastUpdate >= interval) {
     lastUpdate = millis();
